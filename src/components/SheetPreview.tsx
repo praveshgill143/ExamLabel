@@ -2,10 +2,12 @@ import type { CSSProperties } from "react";
 import { ST24_GEOMETRY, type SlotPosition } from "@/domain/geometry";
 import { buildLabelLines, fitLabelLines, mmToPt } from "@/domain/pdf";
 import type { LabelPage } from "@/domain/pagination";
+import { DEFAULT_LABEL_TEXT_STYLE, type LabelTextStyle } from "@/domain/text-style";
 
 export type SheetPreviewProps = {
   page?: LabelPage;
   slotPositions: SlotPosition[];
+  textStyle?: LabelTextStyle;
 };
 
 function positionStyle(position: SlotPosition): CSSProperties {
@@ -17,11 +19,11 @@ function positionStyle(position: SlotPosition): CSSProperties {
   };
 }
 
-function previewMeasure(text: string, fontSizePt: number): number {
-  return text.length * fontSizePt * 0.52;
+function previewMeasure(text: string, fontSizePt: number, bold: boolean): number {
+  return text.length * fontSizePt * 0.52 * (bold ? 1.05 : 1);
 }
 
-export function SheetPreview({ page, slotPositions }: SheetPreviewProps) {
+export function SheetPreview({ page, slotPositions, textStyle = DEFAULT_LABEL_TEXT_STYLE }: SheetPreviewProps) {
   return (
     <section className="preview-card" aria-label="A4 label preview">
       <div className="preview-heading-row">
@@ -55,11 +57,17 @@ export function SheetPreview({ page, slotPositions }: SheetPreviewProps) {
                 const position = placed.position;
                 const contentWidth = mmToPt(position.widthMm - 6);
                 const contentHeight = mmToPt(position.heightMm - 4);
-                const fitted = fitLabelLines(buildLabelLines(placed.student), contentWidth, contentHeight, previewMeasure);
+                const fitted = fitLabelLines(buildLabelLines(placed.student), contentWidth, contentHeight, previewMeasure, textStyle);
                 return <>
                   <div
+                    data-testid={`placed-label-lines-${placed.slotNumber}`}
                     className="placed-label-lines"
-                    style={{ fontSize: `${fitted.fontSizePt}pt`, lineHeight: `${fitted.lineHeightPt}pt` }}
+                    style={{
+                      color: textStyle.fontColor,
+                      fontSize: `${fitted.fontSizePt}pt`,
+                      fontWeight: textStyle.bold ? 700 : 400,
+                      lineHeight: `${fitted.lineHeightPt}pt`,
+                    }}
                   >
                   {fitted.lines.map((line, index) => (
                   <div

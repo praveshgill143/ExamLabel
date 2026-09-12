@@ -1,9 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ParseResult } from "@/domain/spreadsheet";
 import { makeStudents } from "@/test/fixtures";
 import { ExamLabelApp } from "./ExamLabelApp";
+
+beforeEach(() => localStorage.clear());
 
 function validResult(count = 2): ParseResult {
   return { students: makeStudents(count), issues: [], errors: [] };
@@ -52,6 +54,61 @@ describe("ExamLabelApp", () => {
     await user.selectOptions(screen.getByLabelText("Label Fill Order"), "down-columns");
     expect(screen.getByTestId("placed-label-2")).toHaveTextContent("Student Name: STUDENT 9");
     expect(screen.getByTestId("placed-label-4")).toHaveTextContent("Student Name: STUDENT 2");
+  });
+
+  it("updates all label text controls live and passes the same style to PDF", async () => {
+    const user = userEvent.setup();
+    const parser = vi.fn().mockResolvedValue(validResult(1));
+    const generatePdf = vi.fn().mockResolvedValue(new Uint8Array([37, 80, 68, 70]));
+    const createObjectURL = vi.fn().mockReturnValue("blob:exam-labels");
+    Object.defineProperty(URL, "createObjectURL", { value: createObjectURL, configurable: true });
+    Object.defineProperty(URL, "revokeObjectURL", { value: vi.fn(), configurable: true });
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+    render(<ExamLabelApp parseWorkbook={parser} generatePdf={generatePdf} />);
+    await user.upload(screen.getByLabelText("Student spreadsheet"), makeUploadFile());
+    await screen.findByText("1 valid student");
+
+    expect(screen.getByTestId("placed-label-lines-1")).toHaveStyle({ fontSize: "8.5pt", color: "rgb(0, 0, 0)", fontWeight: "400" });
+    await user.click(screen.getByRole("button", { name: "Increase label font size" }));
+    await user.click(screen.getByLabelText("Label font color"));
+    fireEvent.change(screen.getByLabelText("Label font color"), { target: { value: "#ff0000" } });
+    await user.click(screen.getByLabelText("Bold"));
+
+    expect(screen.getByTestId("placed-label-lines-1")).toHaveStyle({ fontSize: "9.5pt", color: "rgb(255, 0, 0)", fontWeight: "700" });
+    await user.click(screen.getByRole("button", { name: "Download PDF" }));
+    await waitFor(() => expect(generatePdf).toHaveBeenCalledTimes(1));
+    expect(generatePdf.mock.calls[0][1]).toEqual({ fontSizePt: 9.5, fontColor: "#FF0000", bold: true });
+  });
+
+  it("applies the text style to labels in Down Columns mode", async () => {
+    const user = userEvent.setup();
+    const parser = vi.fn().mockResolvedValue(validResult(10));
+    render(<ExamLabelApp parseWorkbook={parser} />);
+    await user.upload(screen.getByLabelText("Student spreadsheet"), makeUploadFile());
+    await screen.findByText("10 valid students");
+    await user.selectOptions(screen.getByLabelText("Label Fill Order"), "down-columns");
+    await user.click(screen.getByLabelText("Bold"));
+
+    expect(screen.getByTestId("placed-label-lines-2")).toHaveStyle({ fontWeight: "700" });
+    expect(screen.getByTestId("placed-label-2")).toHaveTextContent("Student Name: STUDENT 9");
+  });
+
+  it("restores persisted text settings after remount", async () => {
+    const user = userEvent.setup();
+    const parser = vi.fn().mockResolvedValue(validResult(1));
+    const { unmount } = render(<ExamLabelApp parseWorkbook={parser} />);
+    await user.upload(screen.getByLabelText("Student spreadsheet"), makeUploadFile());
+    await screen.findByText("1 valid student");
+    await user.click(screen.getByRole("button", { name: "Increase label font size" }));
+    await user.click(screen.getByLabelText("Bold"));
+    fireEvent.change(screen.getByLabelText("Label font color"), { target: { value: "#0000ff" } });
+    unmount();
+
+    render(<ExamLabelApp parseWorkbook={parser} />);
+    expect(screen.getByLabelText("Label font size")).toHaveTextContent("9.5 pt");
+    expect(screen.getByLabelText("Bold")).toBeChecked();
+    expect(screen.getByLabelText("Label font color")).toHaveValue("#0000ff");
   });
 
   it("applies X and Y calibration to the preview", async () => {

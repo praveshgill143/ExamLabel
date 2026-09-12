@@ -1,6 +1,11 @@
 import type { LabelPage, PlacedLabel } from "./pagination";
-import type { PDFOperator, PDFPage, PDFFont } from "pdf-lib";
+import type { PDFOperator, PDFPage, PDFFont, RGB } from "pdf-lib";
 import type { StudentRecord } from "./student";
+import {
+  DEFAULT_LABEL_TEXT_STYLE,
+  hexToPdfRgb,
+  type LabelTextStyle,
+} from "./text-style";
 
 const POINTS_PER_INCH = 72;
 const MM_PER_INCH = 25.4;
@@ -74,17 +79,19 @@ export function fitLabelLines(
   availableWidthPt: number,
   availableHeightPt: number,
   measureText: MeasureText,
+  textStyle?: LabelTextStyle,
 ): FittedLabel {
+  const styledLines = textStyle ? lines.map((line) => ({ ...line, bold: textStyle.bold })) : lines;
   const lineHeight = (fontSizePt: number) =>
     LABEL_FIT_CONFIG.defaultLineHeightPt *
     (fontSizePt / LABEL_FIT_CONFIG.preferredFontSizePt);
   const nextFontSize = (fontSizePt: number) =>
     Math.round((fontSizePt - LABEL_FIT_CONFIG.fontStepPt) * 100) / 100;
   const fitsWithoutWrapping = (fontSizePt: number) =>
-    lines.every((line) => measureText(line.text, fontSizePt, line.bold) <= availableWidthPt) &&
-    lines.length * lineHeight(fontSizePt) <= availableHeightPt;
+    styledLines.every((line) => measureText(line.text, fontSizePt, line.bold) <= availableWidthPt) &&
+    styledLines.length * lineHeight(fontSizePt) <= availableHeightPt;
 
-  let fontSizePt: number = LABEL_FIT_CONFIG.preferredFontSizePt;
+  let fontSizePt: number = textStyle?.fontSizePt ?? LABEL_FIT_CONFIG.preferredFontSizePt;
   while (fontSizePt >= LABEL_FIT_CONFIG.singleLinePreferenceMinFontSizePt) {
     if (fitsWithoutWrapping(fontSizePt)) {
       return { lines, fontSizePt, lineHeightPt: lineHeight(fontSizePt) };
@@ -93,11 +100,11 @@ export function fitLabelLines(
   }
 
   fontSizePt = LABEL_FIT_CONFIG.singleLinePreferenceMinFontSizePt;
-  let lastAttempt: FittedLabel = { lines, fontSizePt, lineHeightPt: lineHeight(fontSizePt) };
+  let lastAttempt: FittedLabel = { lines: styledLines, fontSizePt, lineHeightPt: lineHeight(fontSizePt) };
 
   while (fontSizePt >= LABEL_FIT_CONFIG.minimumReadableFontSizePt) {
     const lineHeightPt = lineHeight(fontSizePt);
-    const wrappedLines = lines.flatMap((line) => wrapLine(line, fontSizePt, availableWidthPt, measureText));
+    const wrappedLines = styledLines.flatMap((line) => wrapLine(line, fontSizePt, availableWidthPt, measureText));
     const fitsWidth = wrappedLines.every(
       (line) => measureText(line.text, fontSizePt, line.bold) <= availableWidthPt,
     );
@@ -120,6 +127,8 @@ function drawPlacedLabel(
   pageHeightPt: number,
   regularFont: PDFFont,
   boldFont: PDFFont,
+  textStyle: LabelTextStyle,
+  textColor: RGB,
   operators: {
     pushGraphicsState: () => PDFOperator;
     popGraphicsState: () => PDFOperator;
@@ -145,6 +154,7 @@ function drawPlacedLabel(
     contentWidth,
     clipHeight,
     (text, size, bold) => (bold ? boldFont : regularFont).widthOfTextAtSize(text, size),
+    textStyle,
   );
   if (fitted.warning) throw new Error(fitted.warning);
   const blockHeight = fitted.lines.length * fitted.lineHeightPt;
@@ -164,6 +174,7 @@ function drawPlacedLabel(
       y: baselineY,
       size: fitted.fontSizePt,
       font: line.bold ? boldFont : regularFont,
+      color: textColor,
     });
     baselineY -= fitted.lineHeightPt;
   }
@@ -171,7 +182,10 @@ function drawPlacedLabel(
   page.pushOperators(operators.popGraphicsState());
 }
 
-export async function generateLabelPdf(pages: LabelPage[]): Promise<Uint8Array> {
+export async function generateLabelPdf(
+  pages: LabelPage[],
+  textStyle: LabelTextStyle = DEFAULT_LABEL_TEXT_STYLE,
+): Promise<Uint8Array> {
   if (pages.length === 0) {
     throw new Error("There are no valid student labels to generate.");
   }
@@ -185,6 +199,7 @@ export async function generateLabelPdf(pages: LabelPage[]): Promise<Uint8Array> 
     rectangle,
     clip,
     endPath,
+    rgb,
   } = pdfLib;
 
   const document = await PDFDocument.create();
@@ -193,11 +208,13 @@ export async function generateLabelPdf(pages: LabelPage[]): Promise<Uint8Array> 
   const pageWidthPt = mmToPt(210);
   const pageHeightPt = mmToPt(297);
   const operators = { pushGraphicsState, popGraphicsState, rectangle, clip, endPath };
+  const normalizedColor = hexToPdfRgb(textStyle.fontColor);
+  const textColor = rgb(normalizedColor.red, normalizedColor.green, normalizedColor.blue);
 
   for (const labelPage of pages) {
     const page = document.addPage([pageWidthPt, pageHeightPt]);
     for (const placed of labelPage.labels) {
-      drawPlacedLabel(page, placed, pageHeightPt, regularFont, boldFont, operators);
+      drawPlacedLabel(page, placed, pageHeightPt, regularFont, boldFont, textStyle, textColor, operators);
     }
   }
 

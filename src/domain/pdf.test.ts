@@ -8,6 +8,7 @@ import {
   LABEL_FIT_CONFIG,
   mmToPt,
 } from "./pdf";
+import { DEFAULT_LABEL_TEXT_STYLE } from "./text-style";
 
 describe("PDF label renderer", () => {
   it("converts millimetres to PDF points", () => {
@@ -101,5 +102,19 @@ describe("PDF label renderer", () => {
     const { PDFDocument } = await import("pdf-lib");
     const document = await PDFDocument.load(bytes);
     expect(document.getPageCount()).toBe(2);
+  });
+
+  it("accepts the shared text style for PDF rendering without changing page geometry", async () => {
+    const bytes = await generateLabelPdf(paginateStudents(makeStudents(1), 1), {
+      ...DEFAULT_LABEL_TEXT_STYLE,
+      fontSizePt: 12,
+      fontColor: "#FF0000",
+      bold: true,
+    });
+    const { PDFDocument } = await import("pdf-lib");
+    const document = await PDFDocument.load(bytes);
+    const { width, height } = document.getPage(0).getSize();
+    expect(width).toBeCloseTo(mmToPt(210), 4);
+    expect(height).toBeCloseTo(mmToPt(297), 4);
   });
 });

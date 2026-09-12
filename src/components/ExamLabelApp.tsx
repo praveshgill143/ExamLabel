@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getAllSlotPositions, type Calibration } from "@/domain/geometry";
 import { paginateStudents, type LabelFillOrder } from "@/domain/pagination";
 import { generateLabelPdf } from "@/domain/pdf";
+import { loadLabelTextStyle, saveLabelTextStyle, type LabelTextStyle } from "@/domain/text-style";
 import {
   parseWorkbookBytes,
   type ParseResult,
@@ -33,6 +34,7 @@ export function ExamLabelApp({
   const [startSlot, setStartSlot] = useState(1);
   const [calibration, setCalibration] = useState<Calibration>({ xMm: 0, yMm: 0 });
   const [fillOrder, setFillOrder] = useState<LabelFillOrder>("across-rows");
+  const [textStyle, setTextStyle] = useState<LabelTextStyle>(() => loadLabelTextStyle());
   const [activePageIndex, setActivePageIndex] = useState(0);
 
   const pages = useMemo(
@@ -44,11 +46,15 @@ export function ExamLabelApp({
   const activePage = pages[safePageIndex];
 
   useEffect(() => {
+    saveLabelTextStyle(textStyle);
+  }, [textStyle]);
+
+  useEffect(() => {
     setActivePageIndex(0);
   }, [result.students, startSlot, calibration.xMm, calibration.yMm, fillOrder]);
 
   async function createPdfBlob(): Promise<Blob> {
-    const bytes = await generatePdf(pages);
+    const bytes = await generatePdf(pages, textStyle);
     return new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
   }
 
@@ -160,10 +166,12 @@ export function ExamLabelApp({
             startSlot={startSlot}
             calibration={calibration}
             fillOrder={fillOrder}
+            textStyle={textStyle}
             disabled={validCount === 0}
             onStartSlotChange={setStartSlot}
             onCalibrationChange={setCalibration}
             onFillOrderChange={setFillOrder}
+            onTextStyleChange={setTextStyle}
           />
 
           {hasLoadedFile ? (
@@ -223,7 +231,7 @@ export function ExamLabelApp({
         </div>
 
         <div className="preview-column">
-          <SheetPreview page={activePage} slotPositions={slotPositions} />
+          <SheetPreview page={activePage} slotPositions={slotPositions} textStyle={textStyle} />
 
           {pages.length > 1 ? (
             <div className="page-nav" aria-label="Preview page navigation">

@@ -1,14 +1,21 @@
 import type { Calibration } from "@/domain/geometry";
 import type { LabelFillOrder } from "@/domain/pagination";
+import {
+  MAX_LABEL_FONT_SIZE_PT,
+  MIN_LABEL_FONT_SIZE_PT,
+  type LabelTextStyle,
+} from "@/domain/text-style";
 
 export type ControlsPanelProps = {
   startSlot: number;
   calibration: Calibration;
   fillOrder: LabelFillOrder;
+  textStyle: LabelTextStyle;
   disabled: boolean;
   onStartSlotChange: (slot: number) => void;
   onCalibrationChange: (calibration: Calibration) => void;
   onFillOrderChange: (fillOrder: LabelFillOrder) => void;
+  onTextStyleChange: (textStyle: LabelTextStyle) => void;
 };
 
 function safeOffset(value: string): number {
@@ -21,10 +28,12 @@ export function ControlsPanel({
   startSlot,
   calibration,
   fillOrder,
+  textStyle,
   disabled,
   onStartSlotChange,
   onCalibrationChange,
   onFillOrderChange,
+  onTextStyleChange,
 }: ControlsPanelProps) {
   return (
     <section className="card controls-card">
@@ -35,6 +44,50 @@ export function ControlsPanel({
       </div>
 
       <div className="control-grid">
+        <div className="control-grid__wide text-style-controls">
+          <span>Label Text Style</span>
+          <div className="text-style-controls__row">
+            <span className="text-style-controls__label">Font Size:</span>
+            <button
+              type="button"
+              aria-label="Decrease label font size"
+              disabled={disabled || textStyle.fontSizePt <= MIN_LABEL_FONT_SIZE_PT}
+              onClick={() => onTextStyleChange({ ...textStyle, fontSizePt: textStyle.fontSizePt - 1 })}
+            >
+              −
+            </button>
+            <output aria-label="Label font size">{textStyle.fontSizePt} pt</output>
+            <button
+              type="button"
+              aria-label="Increase label font size"
+              disabled={disabled || textStyle.fontSizePt >= MAX_LABEL_FONT_SIZE_PT}
+              onClick={() => onTextStyleChange({ ...textStyle, fontSizePt: textStyle.fontSizePt + 1 })}
+            >
+              +
+            </button>
+            <label className="text-style-controls__color">
+              <span>Font Color:</span>
+              <input
+                aria-label="Label font color"
+                type="color"
+                value={textStyle.fontColor}
+                disabled={disabled}
+                onChange={(event) => onTextStyleChange({ ...textStyle, fontColor: event.target.value.toUpperCase() })}
+              />
+            </label>
+            <label className="text-style-controls__bold">
+              <input
+                aria-label="Bold"
+                type="checkbox"
+                checked={textStyle.bold}
+                disabled={disabled}
+                onChange={(event) => onTextStyleChange({ ...textStyle, bold: event.target.checked })}
+              />
+              <span>Bold</span>
+            </label>
+          </div>
+        </div>
+
         <label>
           <span>Label Fill Order</span>
           <select
