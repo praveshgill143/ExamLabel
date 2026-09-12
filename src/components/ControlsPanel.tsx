@@ -1,11 +1,14 @@
 import type { Calibration } from "@/domain/geometry";
+import type { LabelFillOrder } from "@/domain/pagination";
 
 export type ControlsPanelProps = {
   startSlot: number;
   calibration: Calibration;
+  fillOrder: LabelFillOrder;
   disabled: boolean;
   onStartSlotChange: (slot: number) => void;
   onCalibrationChange: (calibration: Calibration) => void;
+  onFillOrderChange: (fillOrder: LabelFillOrder) => void;
 };
 
 function safeOffset(value: string): number {
@@ -17,9 +20,11 @@ function safeOffset(value: string): number {
 export function ControlsPanel({
   startSlot,
   calibration,
+  fillOrder,
   disabled,
   onStartSlotChange,
   onCalibrationChange,
+  onFillOrderChange,
 }: ControlsPanelProps) {
   return (
     <section className="card controls-card">
@@ -30,6 +35,19 @@ export function ControlsPanel({
       </div>
 
       <div className="control-grid">
+        <label>
+          <span>Label Fill Order</span>
+          <select
+            aria-label="Label Fill Order"
+            value={fillOrder}
+            disabled={disabled}
+            onChange={(event) => onFillOrderChange(event.target.value as LabelFillOrder)}
+          >
+            <option value="across-rows">Across Rows</option>
+            <option value="down-columns">Down Columns</option>
+          </select>
+        </label>
+
         <label>
           <span>Start from label</span>
           <select

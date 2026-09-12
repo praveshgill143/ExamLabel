@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getAllSlotPositions, type Calibration } from "@/domain/geometry";
-import { paginateStudents } from "@/domain/pagination";
+import { paginateStudents, type LabelFillOrder } from "@/domain/pagination";
 import { generateLabelPdf } from "@/domain/pdf";
 import {
   parseWorkbookBytes,
@@ -32,11 +32,12 @@ export function ExamLabelApp({
   const [downloadError, setDownloadError] = useState("");
   const [startSlot, setStartSlot] = useState(1);
   const [calibration, setCalibration] = useState<Calibration>({ xMm: 0, yMm: 0 });
+  const [fillOrder, setFillOrder] = useState<LabelFillOrder>("across-rows");
   const [activePageIndex, setActivePageIndex] = useState(0);
 
   const pages = useMemo(
-    () => paginateStudents(result.students, startSlot, calibration),
-    [result.students, startSlot, calibration],
+    () => paginateStudents(result.students, startSlot, calibration, fillOrder),
+    [result.students, startSlot, calibration, fillOrder],
   );
   const slotPositions = useMemo(() => getAllSlotPositions(calibration), [calibration]);
   const safePageIndex = Math.min(activePageIndex, Math.max(0, pages.length - 1));
@@ -44,7 +45,7 @@ export function ExamLabelApp({
 
   useEffect(() => {
     setActivePageIndex(0);
-  }, [result.students, startSlot, calibration.xMm, calibration.yMm]);
+  }, [result.students, startSlot, calibration.xMm, calibration.yMm, fillOrder]);
 
   async function createPdfBlob(): Promise<Blob> {
     const bytes = await generatePdf(pages);
@@ -158,9 +159,11 @@ export function ExamLabelApp({
           <ControlsPanel
             startSlot={startSlot}
             calibration={calibration}
+            fillOrder={fillOrder}
             disabled={validCount === 0}
             onStartSlotChange={setStartSlot}
             onCalibrationChange={setCalibration}
+            onFillOrderChange={setFillOrder}
           />
 
           {hasLoadedFile ? (

@@ -1,9 +1,13 @@
 import {
   getSlotPosition,
+  getSlotNumber,
+  ST24_GEOMETRY,
   type Calibration,
   type SlotPosition,
 } from "./geometry";
 import type { StudentRecord } from "./student";
+
+export type LabelFillOrder = "across-rows" | "down-columns";
 
 export type PlacedLabel = {
   pageNumber: number;
@@ -23,10 +27,21 @@ function assertStartSlot(startSlot: number): void {
   }
 }
 
+export function getSlotOrder(fillOrder: LabelFillOrder = "across-rows"): number[] {
+  if (fillOrder === "across-rows") {
+    return Array.from({ length: ST24_GEOMETRY.columns * ST24_GEOMETRY.rows }, (_, index) => index + 1);
+  }
+
+  return Array.from({ length: ST24_GEOMETRY.columns }, (_, column) =>
+    Array.from({ length: ST24_GEOMETRY.rows }, (_, row) => getSlotNumber(row, column)),
+  ).flat();
+}
+
 export function paginateStudents(
   students: StudentRecord[],
   startSlot: number,
   calibration: Calibration = { xMm: 0, yMm: 0 },
+  fillOrder: LabelFillOrder = "across-rows",
 ): LabelPage[] {
   assertStartSlot(startSlot);
 
@@ -36,13 +51,16 @@ export function paginateStudents(
 
   const pages: LabelPage[] = [];
   let pageNumber = 1;
-  let slotNumber = startSlot;
+  const slotOrder = getSlotOrder(fillOrder);
+  let slotIndex = slotOrder.indexOf(startSlot);
 
   for (const student of students) {
-    if (slotNumber > 24) {
+    if (slotIndex >= slotOrder.length) {
       pageNumber += 1;
-      slotNumber = 1;
+      slotIndex = 0;
     }
+
+    const slotNumber = slotOrder[slotIndex];
 
     let page = pages.at(-1);
     if (!page || page.pageNumber !== pageNumber) {
@@ -57,7 +75,7 @@ export function paginateStudents(
       position: getSlotPosition(slotNumber, calibration),
     });
 
-    slotNumber += 1;
+    slotIndex += 1;
   }
 
   return pages;

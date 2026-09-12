@@ -40,6 +40,20 @@ describe("ExamLabelApp", () => {
     expect(screen.queryByTestId("placed-label-1")).not.toBeInTheDocument();
   });
 
+  it("defaults to Across Rows and updates the preview when Down Columns is selected", async () => {
+    const user = userEvent.setup();
+    const parser = vi.fn().mockResolvedValue(validResult(10));
+    render(<ExamLabelApp parseWorkbook={parser} />);
+
+    await user.upload(screen.getByLabelText("Student spreadsheet"), makeUploadFile());
+    await screen.findByText("10 valid students");
+    expect(screen.getByTestId("placed-label-2")).toHaveTextContent("Student Name: STUDENT 2");
+
+    await user.selectOptions(screen.getByLabelText("Label Fill Order"), "down-columns");
+    expect(screen.getByTestId("placed-label-2")).toHaveTextContent("Student Name: STUDENT 9");
+    expect(screen.getByTestId("placed-label-4")).toHaveTextContent("Student Name: STUDENT 2");
+  });
+
   it("applies X and Y calibration to the preview", async () => {
     const user = userEvent.setup();
     const parser = vi.fn().mockResolvedValue(validResult(1));
