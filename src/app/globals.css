@@ -546,3 +546,108 @@ tbody tr:last-child td {
     flex-direction: column;
   }
 }
+
+
+
+.seo-page {
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--text);
+}
+.seo-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(980px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0;
+}
+.seo-brand { color: var(--text); font-size: 20px; font-weight: 800; text-decoration: none; }
+.seo-nav-link, .seo-related a, .seo-bottom-cta a { color: var(--primary-dark); font-weight: 700; }
+.seo-content {
+  width: min(820px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 80px;
+}
+.seo-content h1 { margin: 0; font-size: clamp(34px, 6vw, 58px); letter-spacing: -0.04em; }
+.seo-lede { max-width: 720px; margin: 18px 0 22px; color: #344054; font-size: 20px; line-height: 1.55; }
+.seo-cta {
+  display: inline-block;
+  border-radius: 10px;
+  background: var(--primary);
+  padding: 12px 16px;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+.seo-cta:hover { background: var(--primary-dark); }
+.seo-section {
+  margin-top: 42px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+.seo-section h2 { margin: 0 0 12px; font-size: 26px; }
+.seo-section p, .seo-faq p, .seo-related li { color: #475467; line-height: 1.7; }
+.seo-faq + .seo-faq { margin-top: 22px; }
+.seo-faq h3 { margin-bottom: 6px; font-size: 18px; }
+.seo-related ul { display: flex; flex-wrap: wrap; gap: 10px 24px; margin: 0; padding-left: 20px; }
+.seo-bottom-cta { margin-top: 42px; font-size: 18px; }
+@media (max-width: 600px) {
+  .seo-nav, .seo-content { width: min(100% - 20px, 820px); }
+  .seo-nav { align-items: flex-start; flex-direction: column; }
+  .seo-content { padding-top: 28px; }
+}
+
+
+.seo-home-content {
+  width: min(920px, calc(100% - 32px));
+  margin: 28px auto 64px;
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+}
+.seo-home-content h2 { margin: 0 0 12px; font-size: clamp(24px, 3vw, 32px); }
+.seo-home-content p { max-width: 780px; color: var(--muted); line-height: 1.6; }
+
+
+.hero { align-items: stretch; display: block; margin-bottom: 28px; border: 1px solid #cfdced; border-radius: 24px; background: linear-gradient(135deg, #ffffff 0%, #f3f7ff 100%); padding: clamp(22px, 4vw, 42px); }
+.hero-brand-row, .hero-main { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.hero-brand-row { margin-bottom: clamp(28px, 5vw, 54px); }
+.hero-brand { color: var(--text); font-size: 22px; font-weight: 900; letter-spacing: -0.03em; text-decoration: none; }
+.hero-brand-context { color: var(--muted); font-size: 13px; font-weight: 700; }
+.hero-main { align-items: flex-end; }
+.hero-main > div:first-child { max-width: 760px; }
+.hero h1 { max-width: 700px; font-size: clamp(36px, 6vw, 64px); }
+.hero-copy { max-width: 680px; margin-top: 16px; color: #344054; font-size: clamp(19px, 2.5vw, 25px); line-height: 1.4; }
+.hero-supporting { max-width: 680px; margin: 12px 0 24px; color: var(--muted); font-size: 16px; line-height: 1.55; }
+.hero-cta { display: inline-flex; align-items: center; min-height: 46px; border-radius: 10px; background: var(--primary); padding: 11px 17px; color: #fff; font-weight: 800; text-decoration: none; }
+.hero-cta:hover { background: var(--primary-dark); }
+.hero-specs { max-width: 260px; justify-content: flex-end; }
+.hero-specs span { background: rgba(255, 255, 255, 0.85); }
+#label-tool { scroll-margin-top: 18px; }
+.upload-zone { min-height: 168px; border-color: #7fa8df; background: #f2f7ff; }
+.upload-zone__title { color: var(--primary-dark); font-size: 17px; }
+.workflow-grid { gap: 28px; }
+.homepage-sections { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 80px; }
+.marketing-section { margin-top: 56px; }
+.section-heading { max-width: 760px; }
+.section-heading h2 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.03em; }
+.section-heading > p:last-child { color: var(--muted); font-size: 17px; line-height: 1.6; }
+.step-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 24px; }
+.step-card { min-height: 190px; border: 1px solid var(--border); border-radius: 16px; background: var(--card-bg); padding: 20px; box-shadow: 0 8px 24px rgba(16, 24, 40, 0.04); }
+.step-number { color: var(--primary); font-size: 13px; font-weight: 900; letter-spacing: 0.08em; }
+.step-card h3 { margin: 30px 0 8px; font-size: 21px; }
+.step-card p { margin: 0; color: var(--muted); line-height: 1.55; }
+.audience-section { border-radius: 20px; background: #172d50; padding: clamp(24px, 5vw, 48px); color: #fff; }
+.audience-section .eyebrow { color: #a9caff; }
+.audience-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 18px; margin: 28px 0 0; padding: 0; list-style: none; }
+.audience-grid li { border-top: 1px solid rgba(255,255,255,0.22); padding: 14px 0; font-weight: 700; }
+.privacy-note { margin-top: 32px; border: 1px solid #c8e6d0; border-radius: 16px; background: #f2fbf5; padding: 22px 24px; }
+.privacy-note h2 { margin: 0 0 8px; font-size: 20px; }
+.privacy-note p { margin: 0; color: #315d3e; line-height: 1.6; }
+.faq-section { max-width: 900px; margin-left: auto; margin-right: auto; }
+.faq-list { margin-top: 24px; border-top: 1px solid var(--border); }
+.faq-list details { border-bottom: 1px solid var(--border); padding: 17px 0; }
+.faq-list summary { cursor: pointer; color: var(--text); font-weight: 800; }
+.faq-list details p { max-width: 760px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
+@media (max-width: 900px) { .hero-main { align-items: flex-start; flex-direction: column; } .hero-specs { max-width: none; justify-content: flex-start; } .step-grid { grid-template-columns: repeat(2, 1fr); } .audience-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .hero { border-radius: 18px; padding: 20px; } .hero-brand-row { align-items: flex-start; flex-direction: column; gap: 8px; margin-bottom: 34px; } .hero-specs { justify-content: flex-start; } .hero-specs span { font-size: 12px; } .step-grid, .audience-grid { grid-template-columns: 1fr; } .homepage-sections { width: min(100% - 20px, 1180px); } }

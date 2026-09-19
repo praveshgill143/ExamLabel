@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useMemo, useState } from "react";
 import { getAllSlotPositions, type Calibration } from "@/domain/geometry";
 import { paginateStudents, type LabelFillOrder } from "@/domain/pagination";
@@ -139,22 +141,32 @@ export function ExamLabelApp({
   return (
     <main className="app-shell">
       <header className="hero">
-        <div>
-          <p className="eyebrow">School exam utility</p>
-          <h1>Exam Label Generator</h1>
-          <p className="hero-copy">
-            Upload student data and create print-ready labels for your A4 ST-24 sheet — 24 labels,
-            3 columns × 8 rows.
-          </p>
+        <div className="hero-brand-row">
+          <Link className="hero-brand" href="/" aria-label="ExamLabel home">ExamLabel</Link>
+          <span className="hero-brand-context">For schools and examination teams</span>
         </div>
-        <div className="hero-specs" aria-label="ST-24 dimensions">
-          <span>A4</span>
-          <span>64 × 34 mm</span>
-          <span>24 labels</span>
+        <div className="hero-main">
+          <div>
+            <p className="eyebrow">Online exam label generator for schools & institutions</p>
+            <h1>Online Exam Label Generator</h1>
+            <p className="hero-copy">
+              Create professional, print-ready exam labels from Excel or CSV in seconds.
+            </p>
+            <p className="hero-supporting">
+              Designed for CBSE, ICSE, state-board and international schools, colleges, examination centres and institutes.
+            </p>
+            <a className="hero-cta" href="#label-tool">Upload Excel or CSV</a>
+          </div>
+          <div className="hero-specs" aria-label="Supported label format">
+            <span>A4</span>
+            <span>24 labels</span>
+            <span>3 &times; 8 layout</span>
+            <span>ST-24 supported</span>
+          </div>
         </div>
       </header>
 
-      <div className="workflow-grid">
+      <div className="workflow-grid" id="label-tool">
         <div className="workflow-column">
           <UploadPanel
             fileName={fileName}
@@ -202,7 +214,7 @@ export function ExamLabelApp({
                 disabled={pages.length === 0 || isGenerating}
                 onClick={handleDownloadPdf}
               >
-                {isGenerating ? "Generating PDF…" : "Download PDF"}
+                {isGenerating ? "Generating PDF..." : "Download PDF"}
               </button>
                 <button
                   className="secondary-button"
@@ -263,3 +275,8 @@ export function ExamLabelApp({
     </main>
   );
 }
+
+
+
+
+

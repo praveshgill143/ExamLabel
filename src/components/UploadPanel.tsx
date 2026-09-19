@@ -9,12 +9,12 @@ export function UploadPanel({ fileName, isLoading, onFileSelected }: UploadPanel
     <section className="card upload-card">
       <div>
         <p className="eyebrow">Step 1</p>
-        <h2>Upload student Excel sheet</h2>
-        <p className="muted">The first row defines 1 to 5 label fields. Blank headings are ignored.</p>
+        <h2>Upload examination data</h2>
+        <p className="muted">Your first row becomes the label headings. Blank headings are ignored.</p>
       </div>
 
       <label className="upload-zone">
-        <span className="upload-zone__title">{isLoading ? "Reading spreadsheet…" : "Choose Excel or CSV file"}</span>
+        <span className="upload-zone__title">{isLoading ? "Reading spreadsheet..." : "Upload Excel or CSV"}</span>
         <span className="upload-zone__hint">.xlsx, .xls or .csv</span>
         <input
           aria-label="Student spreadsheet"
@@ -29,3 +29,5 @@ export function UploadPanel({ fileName, isLoading, onFileSelected }: UploadPanel
     </section>
   );
 }
+
+
