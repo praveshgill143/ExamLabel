@@ -651,3 +651,5 @@ tbody tr:last-child td {
 .faq-list details p { max-width: 760px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
 @media (max-width: 900px) { .hero-main { align-items: flex-start; flex-direction: column; } .hero-specs { max-width: none; justify-content: flex-start; } .step-grid { grid-template-columns: repeat(2, 1fr); } .audience-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) { .hero { border-radius: 18px; padding: 20px; } .hero-brand-row { align-items: flex-start; flex-direction: column; gap: 8px; margin-bottom: 34px; } .hero-specs { justify-content: flex-start; } .hero-specs span { font-size: 12px; } .step-grid, .audience-grid { grid-template-columns: 1fr; } .homepage-sections { width: min(100% - 20px, 1180px); } }
+
+.action-row--download-only { grid-template-columns: 1fr; }

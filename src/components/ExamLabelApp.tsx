@@ -102,40 +102,6 @@ export function ExamLabelApp({
     }
   }
 
-  async function handlePrintLabels() {
-    if (pages.length === 0) return;
-
-    const printWindow = window.open("", "_blank", "noopener,noreferrer");
-    if (!printWindow) {
-      setDownloadError("Print window was blocked. Please allow pop-ups and try again.");
-      return;
-    }
-
-    setIsGenerating(true);
-    setDownloadError("");
-
-    try {
-      const blob = await createPdfBlob();
-      const url = URL.createObjectURL(blob);
-
-      printWindow.addEventListener(
-        "load",
-        () => {
-          printWindow.print();
-          URL.revokeObjectURL(url);
-        },
-        { once: true },
-      );
-      printWindow.location.href = url;
-    } catch (error) {
-      printWindow.close();
-      const message = error instanceof Error ? error.message : "Unknown PDF error";
-      setDownloadError(`Could not generate PDF: ${message}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  }
-
   const validCount = result.students.length;
 
   return (
@@ -207,7 +173,7 @@ export function ExamLabelApp({
 
               {downloadError ? <div className="error-box">{downloadError}</div> : null}
 
-              <div className="action-row">
+              <div className="action-row action-row--download-only">
               <button
                 className="primary-button"
                 type="button"
@@ -216,14 +182,6 @@ export function ExamLabelApp({
               >
                 {isGenerating ? "Generating PDF..." : "Download PDF"}
               </button>
-                <button
-                  className="secondary-button"
-                  type="button"
-                  disabled={pages.length === 0 || isGenerating}
-                  onClick={handlePrintLabels}
-                >
-                  Print Labels
-                </button>
               </div>
 
               <p className="print-warning">
@@ -231,12 +189,9 @@ export function ExamLabelApp({
               </p>
             </section>
           ) : (
-            <div className="action-row action-row--standalone">
+            <div className="action-row action-row--download-only action-row--standalone">
               <button className="primary-button" type="button" disabled>
                 Download PDF
-              </button>
-              <button className="secondary-button" type="button" disabled>
-                Print Labels
               </button>
             </div>
           )}
@@ -275,8 +230,3 @@ export function ExamLabelApp({
     </main>
   );
 }
-
-
-
-
-
